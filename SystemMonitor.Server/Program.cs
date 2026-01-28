@@ -27,7 +27,7 @@ namespace SystemMonitor.Server
 
                 try
                 {
-                    using (TcpClient client = new TcpClient("127.0.0.1", 5000)) //접속
+                    using (TcpClient client = new TcpClient("127.0.0.1", 5000)) //접속 ip 127.0.0.1=>내 컴퓨터 변경하면 다른 컴에서 접속 가능
                     using (NetworkStream stream = client.GetStream())
                     {
                         byte[] data = Encoding.UTF8.GetBytes(packet);

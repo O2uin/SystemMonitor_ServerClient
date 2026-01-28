@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SystemMonitor"
         mc:Ignorable="d"
-        Title="Monitor" Height="450" Width="800">
+        Title="Monitor" Height="600" Width="800">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -28,20 +28,34 @@
                 <TextBlock Text="CPU USAGE" FontSize="12" Foreground="Gray" HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+            <TextBlock Name="TxtMin" Text="Min: 0%" Margin="10,0" Foreground="blue"/>
+            <TextBlock Name="TxtAvg" Text="Avg: 0%" Margin="10,0" Foreground="black"/>
+            <TextBlock Name="TxtMax" Text="Max: 0%" Margin="10,0" Foreground="OrangeRed"/>
+        </StackPanel>
 
         <Grid Grid.Column="1" Margin="20,0,0,0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="180" />
             </Grid.RowDefinitions>
 
-            <TextBlock Name="CpuText" Grid.Row="0" Text="수신 대기 중..." Foreground="black" FontSize="18" Margin="0,0,0,10"/>
+            <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                <TextBlock Name="CpuText" DockPanel.Dock="Top" Text="수신 대기 중..." 
+                   Foreground="black" FontSize="18" Margin="0,0,0,10"/>
 
-            <Border Grid.Row="1" BorderBrush="#333333" BorderThickness="1">
-                <Canvas Name="GraphCanvas" Background="Black" ClipToBounds="True" SizeChanged="GraphCanvas_SizeChanged">
-                    <Polyline Name="CpuLine" Stroke="Lime" StrokeThickness="2"/>
-                </Canvas>
-            </Border>
+                <Border BorderBrush="#333333" BorderThickness="1">
+                    <Canvas Name="GraphCanvas" Background="Black" ClipToBounds="True" SizeChanged="GraphCanvas_SizeChanged">
+                        <Polyline Name="CpuLine" Stroke="Lime" StrokeThickness="2"/>
+                    </Canvas>
+                </Border>
+            </DockPanel>
+
+            <GroupBox Header="시스템 로그" Grid.Row="1">
+                <ListBox Name="LogList" Background="#222" Foreground="White" 
+                 FontSize="11" BorderThickness="0">
+                </ListBox>
+            </GroupBox>
         </Grid>
     </Grid>
 

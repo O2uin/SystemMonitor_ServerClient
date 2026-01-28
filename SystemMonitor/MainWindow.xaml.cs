@@ -29,6 +29,10 @@ namespace SystemMonitor
         private bool isRunning = true;
         private List<double> cpuValues = new List<double>();
         private const int MaxPoints = 50;//화면에 표시할 점 개수
+        double minCpu = 100;
+        double maxCpu = 0;
+        double sumCpu = 0;
+        int count = 0;
 
         public MainWindow()
         {
@@ -116,6 +120,8 @@ namespace SystemMonitor
                 GaugeEllipse.StrokeDashArray =
                     new DoubleCollection { visibleDash, 1000 };
 
+                UpdateStatistics(value);//최저최소평균 계산
+
                 if (value > 80) GaugeEllipse.Stroke = Brushes.Red;//임계치 이상 색 변경
                 else if (value > 50) GaugeEllipse.Stroke = Brushes.Orange;
                 else GaugeEllipse.Stroke = Brushes.Lime;
@@ -165,6 +171,44 @@ namespace SystemMonitor
                 Canvas.SetLeft(label, 5);
                 Canvas.SetTop(label, y - 12);
                 GraphCanvas.Children.Add(label);
+            }
+        }
+        private void UpdateStatistics(double value)
+        {
+
+            //로그찍기
+            if (value >= 80)
+            {
+                AddLog($"⚠️ CPU 과부하: {value:F1}%");
+            }
+
+            if (count == 1)
+            {//최초 값으로 초기화 ->min 값 0 고정 방지
+                AddLog($"모니터링 시스템 시작");
+                minCpu = value;
+            }
+            
+            if (value > maxCpu) maxCpu = value;
+            if (value < minCpu) minCpu = value;
+
+            count++;
+            sumCpu += value;
+            double avgCpu = sumCpu / count;
+
+            TxtMin.Text = $"Min: {minCpu:F1}%";
+            TxtMax.Text = $"Max: {maxCpu:F1}%";
+            TxtAvg.Text = $"Avg: {avgCpu:F1}%";
+        }
+
+        private void AddLog(string message)
+        {
+            string logEntry = $"[{DateTime.Now:HH:mm:ss}] {message}";
+
+            LogList.Items.Insert(0, logEntry);
+
+            if (LogList.Items.Count > 50)
+            {
+                LogList.Items.RemoveAt(50);
             }
         }
     }
