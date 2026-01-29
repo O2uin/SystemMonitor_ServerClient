@@ -59,21 +59,41 @@ namespace SystemMonitor
 
                         string[] parts = message.Split('|');
 
-                        if (parts.Length == 3)
+                        if (parts.Length == 4)
                         {
                             string cpu = parts[0];
                             string mem = parts[1];
-                            string state = parts[2];
+                            float gpuVal = float.Parse(parts[2].Trim());//혹시 모르기 공백제거 추가해서 변환
+                            float netVal = float.Parse(parts[3].Trim());
 
-                            if (double.TryParse(cpu, out double cpuValue))
+                            if (double.TryParse(cpu, out double cpuValue))//cpu
                             {
                                 UpdateGraph(cpuValue);//그래프 업데이트
-                                UpdateGauge(cpuValue);
+                                UpdateGauge(cpuValue);//게이지 업데이트
+
                             }
 
+                            double douMem=0;
+                            if(double.TryParse(mem, out double memValue))//메모리
+                            {
+                                douMem = memValue;//더블값 변환한거 넣어주기
+                                UpdateRamGauge(memValue);//게이지 업데이트
+
+                                if (memValue > 90)
+                                {
+                                    AddLog($"⚠️ 메모리 부족 위험: {memValue:F1}%");
+                                }
+                            }
+                            
+                            GpuBar.Value = gpuVal;
+                            GpuText.Text = $"{gpuVal:F0}%";
+
+                            NetBar.Value = Math.Min(netVal, 100);
+                            NetText.Text = $"{netVal:F1} MB/s";
+
                             Dispatcher.Invoke(() => {//ui업데이트
-                            CpuText.Text = $"CPU: {cpu}% | MEM: {mem}MB | 상태: {state}";
-                        });
+                            CpuText.Text = $"CPU: {cpu}% | MEM: {douMem:F1}% | GPU: {gpuVal:F1}% | SPEED: {netVal:F1}MB/s";
+                            });
                         }
 
                         
@@ -105,6 +125,20 @@ namespace SystemMonitor
             });
         }
 
+        private void UpdateRamGauge(double value)
+        {
+            RamGaugeText.Text = value.ToString("F0");
+
+            double stroke = 20;
+            double radius = (200 - stroke) / 2.0;
+            double circumference = 2 * Math.PI * radius;
+
+            double visiblePx = circumference * (value / 100.0);
+            double visibleDash = visiblePx / stroke;
+
+            RamGaugeEllipse.StrokeDashArray = 
+                new DoubleCollection { visibleDash, 1000 };
+        }
         private void UpdateGauge(double value)
         {
             Dispatcher.Invoke(() => {

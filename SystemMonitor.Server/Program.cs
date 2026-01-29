@@ -13,16 +13,38 @@ namespace SystemMonitor.Server
     {
         static void Main(string[] args)
         {
-            var memCounter=new PerformanceCounter("Memory", "Available MBytes"); //남은 메모리 MB
-            var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            var memCounter=new PerformanceCounter("Memory", "% Committed Bytes In Use"); //사용중인 메모리%
+            var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");//cpu
+            var category = new PerformanceCounterCategory("GPU Engine");//gpu
+            var counters = category.GetInstanceNames()
+                .Where(instance => instance.EndsWith("engtype_3D")) //3D 렌더링 부하 == 실제 사용량
+                .SelectMany(instance => category.GetCounters(instance))
+                .Where(counter => counter.CounterName == "Utilization Percentage")
+                .ToList();
+            var netCategory = new PerformanceCounterCategory("Network Interface");//네트워크 속도
+            string instanceName = netCategory.GetInstanceNames()[0];
+            var recvCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", instanceName);
+            var sentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", instanceName);
 
             while (true)
             {
                 float cpu = cpuCounter.NextValue();
                 float mem = memCounter.NextValue();
-                string status = "Normal";
+                //string status = "Normal";
+                float gpuUsage;
+                try
+                {
+                    gpuUsage = counters.Sum(c => c.NextValue());
+                }
+                catch
+                {
+                    gpuUsage = 0;
+                }
+                
+                float netSpeed = (recvCounter.NextValue()+sentCounter.NextValue()) / 1024 / 1024; //==> 업로드+다운로드 MB/s
+                
 
-                string packet = $"{cpu:F1}|{mem}|{status}";
+                string packet = $"{cpu:F1}|{mem}|{gpuUsage}|{netSpeed}";
 
 
                 try

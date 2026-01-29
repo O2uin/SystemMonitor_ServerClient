@@ -12,27 +12,62 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" VerticalAlignment="Center">
-            <Ellipse Stroke="#333333" StrokeThickness="20" Width="200" Height="200"/>
-            <Ellipse Name="GaugeEllipse" 
-                     Stroke="Lime" StrokeThickness="20" 
-                     Width="200" Height="200"
-                     StrokeDashArray="0 9999"
-                     RenderTransformOrigin="0.5,0.5">
-                <Ellipse.RenderTransform>
-                    <RotateTransform Angle="-90"/>
-                </Ellipse.RenderTransform>
-            </Ellipse>
-            <StackPanel VerticalAlignment="Center">
-                <TextBlock Name="GaugeText" Text="0" FontSize="45" FontWeight="Bold" Foreground="black" HorizontalAlignment="Center"/>
-                <TextBlock Text="CPU USAGE" FontSize="12" Foreground="Gray" HorizontalAlignment="Center"/>
-            </StackPanel>
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Margin="0,35,503.6,88.4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" VerticalAlignment="Center">
+                <Ellipse Stroke="#333333" StrokeThickness="15" Width="160" Height="160"/>
+                <Ellipse Name="GaugeEllipse" Stroke="Lime" StrokeThickness="15" Width="160" Height="160"
+                 StrokeDashArray="0 9999" RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform>
+                        <RotateTransform Angle="-90"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Name="GaugeText" Text="0" FontSize="35" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="CPU" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1" VerticalAlignment="Center">
+                <Ellipse Stroke="#333333" StrokeThickness="15" Width="160" Height="160"/>
+                <Ellipse Name="RamGaugeEllipse" Stroke="LemonChiffon" StrokeThickness="15" Width="160" Height="160"
+                 StrokeDashArray="0 9999" RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform>
+                        <RotateTransform Angle="-90"/>
+                    </Ellipse.RenderTransform>
+                </Ellipse>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Name="RamGaugeText" Text="0" FontSize="35" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="MEMORY" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
         </Grid>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
             <TextBlock Name="TxtMin" Text="Min: 0%" Margin="10,0" Foreground="blue"/>
             <TextBlock Name="TxtAvg" Text="Avg: 0%" Margin="10,0" Foreground="black"/>
             <TextBlock Name="TxtMax" Text="Max: 0%" Margin="10,0" Foreground="OrangeRed"/>
         </StackPanel>
+        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="20,0,20,20">
+    
+    <TextBlock Text="GPU Usage" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
+    <Grid Margin="0,0,0,10">
+        <ProgressBar Name="GpuBar" Height="12" Value="0" Maximum="100" 
+                     Background="#333" Foreground="SkyBlue" BorderThickness="0"/>
+        <TextBlock Name="GpuText" Text="0%" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+    </Grid>
+
+    <TextBlock Text="Network Speed" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
+    <Grid>
+        <ProgressBar Name="NetBar" Height="12" Value="0" Maximum="100" 
+                     Background="#333" Foreground="LightPink" BorderThickness="0"/>
+        <TextBlock Name="NetText" Text="0 MB/s" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+    </Grid>
+    
+</StackPanel>
 
         <Grid Grid.Column="1" Margin="20,0,0,0">
             <Grid.RowDefinitions>
