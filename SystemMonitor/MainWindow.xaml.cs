@@ -28,6 +28,9 @@ namespace SystemMonitor
         private TcpListener server;
         private bool isRunning = true;
         private List<double> cpuValues = new List<double>();
+        private List<double> ramValues = new List<double>();
+        private List<double> gpuValues = new List<double>();
+        private List<double> netValues = new List<double>();
         private const int MaxPoints = 50;//화면에 표시할 점 개수
         double minCpu = 100;
         double maxCpu = 0;
@@ -37,6 +40,13 @@ namespace SystemMonitor
         public MainWindow()
         {
             InitializeComponent();
+
+            this.Loaded += (s, e) => {
+                DrawGrid(CpuGraphCanvas);
+                DrawGrid(RamGraphCanvas);
+                DrawGrid(GpuGraphCanvas);
+                DrawGrid(NetGraphCanvas);
+            };
 
             StartServer();//서버 켜기
             
@@ -61,28 +71,17 @@ namespace SystemMonitor
 
                         if (parts.Length == 4)
                         {
-                            string cpu = parts[0];
-                            string mem = parts[1];
-                            float gpuVal = float.Parse(parts[2].Trim());//혹시 모르기 공백제거 추가해서 변환
+                            float cpuVal = float.Parse(parts[0].Trim());//혹시 모르기 공백제거 추가해서 변환
+                            float memVal = float.Parse(parts[1].Trim());
+                            float gpuVal = float.Parse(parts[2].Trim());
                             float netVal = float.Parse(parts[3].Trim());
 
-                            if (double.TryParse(cpu, out double cpuValue))//cpu
+                            UpdateAllGraphs(cpuVal, memVal, gpuVal, netVal);//그래프 업데이트
+                            UpdateGauge(cpuVal);//게이지 업데이트
+                            UpdateRamGauge(memVal);//게이지 업데이트
+                            if (memVal > 90)
                             {
-                                UpdateGraph(cpuValue);//그래프 업데이트
-                                UpdateGauge(cpuValue);//게이지 업데이트
-
-                            }
-
-                            double douMem=0;
-                            if(double.TryParse(mem, out double memValue))//메모리
-                            {
-                                douMem = memValue;//더블값 변환한거 넣어주기
-                                UpdateRamGauge(memValue);//게이지 업데이트
-
-                                if (memValue > 90)
-                                {
-                                    AddLog($"⚠️ 메모리 부족 위험: {memValue:F1}%");
-                                }
+                                AddLog($"⚠️ 메모리 부족 위험: {memVal:F1}%");
                             }
                             
                             GpuBar.Value = gpuVal;
@@ -92,7 +91,7 @@ namespace SystemMonitor
                             NetText.Text = $"{netVal:F1} MB/s";
 
                             Dispatcher.Invoke(() => {//ui업데이트
-                            CpuText.Text = $"CPU: {cpu}% | MEM: {douMem:F1}% | GPU: {gpuVal:F1}% | SPEED: {netVal:F1}MB/s";
+                                CpuText.Text = $"| CPU: {cpuVal}% | MEM: {memVal:F1}% | GPU: {gpuVal:F1}% | SPEED: {netVal:F1}MB/s |";
                             });
                         }
 
@@ -102,27 +101,44 @@ namespace SystemMonitor
                 catch (Exception ex) { /* 예외 처리 */ }
             }
         }
-        private void UpdateGraph(double newValue)
+        private void UpdateAllGraphs(double cpu, double ram, double gpu, double net)
         {
             Dispatcher.Invoke(() => {
-                cpuValues.Add(newValue);//데이터 저장
-                if (cpuValues.Count > MaxPoints) cpuValues.RemoveAt(0);
-
-                PointCollection points = new PointCollection();//점 찍기
-                double canvasWidth = GraphCanvas.ActualWidth;
-                double canvasHeight = GraphCanvas.ActualHeight;
-                double xStep = canvasWidth / (MaxPoints - 1);
-
-                for (int i = 0; i < cpuValues.Count; i++)
-                {
-                    double x = i * xStep;
-                    double y = canvasHeight - (cpuValues[i] / 100.0 * canvasHeight);//CPU 값(0~100)을 캔버스 높이에 맞게 변환
-
-                    points.Add(new Point(x, y));
-                }
-
-                CpuLine.Points = points;
+                // 각 리스트 업데이트 및 점 찍기
+                UpdateSingleLine(cpu, cpuValues, CpuLine, CpuGraphCanvas);
+                UpdateSingleLine(ram, ramValues, RamLine, RamGraphCanvas);
+                UpdateSingleLine(gpu, gpuValues, GpuLine, GpuGraphCanvas);
+                UpdateSingleLine(net, netValues, NetLine, NetGraphCanvas, 300); // 네트워크는 최대값 조절 가능
             });
+        }
+
+        private void UpdateSingleLine(double val, List<double> list, Polyline line, Canvas canvas, double maxVal = 100)
+        {
+            list.Add(val);
+            if (list.Count > MaxPoints) list.RemoveAt(0);
+
+
+            PointCollection points = new PointCollection();
+            double w = canvas.ActualWidth;
+            double h = canvas.ActualHeight;
+            if (w <= 0 || h <= 0) return; // 캔버스가 아직 안 그려졌을 때 방지
+
+            double xStep = w / (MaxPoints - 1);
+            for (int i = 0; i < list.Count; i++)
+            {
+                double x = i * xStep;
+                double y = h - (list[i] / maxVal * h);
+                points.Add(new Point(x, y));
+            }
+            
+            if (line == NetLine)
+            {
+                double currentMax = list.Max();
+                maxVal = currentMax > 10 ? currentMax * 1.2 : 10; // 상단 여유 20% 추가
+
+                DrawGrid(canvas, maxVal);
+            }
+            line.Points = points;
         }
 
         private void UpdateRamGauge(double value)
@@ -158,28 +174,35 @@ namespace SystemMonitor
 
                 if (value > 80) GaugeEllipse.Stroke = Brushes.Red;//임계치 이상 색 변경
                 else if (value > 50) GaugeEllipse.Stroke = Brushes.Orange;
-                else GaugeEllipse.Stroke = Brushes.Lime;
+                else GaugeEllipse.Stroke = Brushes.Cyan;
             });
         }
 
         private void GraphCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            DrawGrid();
+            if(sender is Canvas canvas)
+            {
+                DrawGrid(canvas);
+            }
         }
 
-        private void DrawGrid()
+        private void DrawGrid(Canvas targetCanvas, double maxVal = 100)
         {
-            var itemsToRemove = GraphCanvas.Children.OfType<Line>().Cast<UIElement>()
-                        .Concat(GraphCanvas.Children.OfType<TextBlock>().Cast<UIElement>())
-                        .ToList();
+            // 1. 해당 캔버스에서 기존 가이드라인만 찾아 지우기
+            var itemsToRemove = targetCanvas.Children.OfType<Line>().Cast<UIElement>()
+                                .Concat(targetCanvas.Children.OfType<TextBlock>().Cast<UIElement>())
+                                .ToList();
 
             foreach (var item in itemsToRemove)
             {
-                GraphCanvas.Children.Remove(item);
+                targetCanvas.Children.Remove(item);
             }
-            double width = GraphCanvas.ActualWidth;
-            double height = GraphCanvas.ActualHeight;
 
+            double width = targetCanvas.ActualWidth;
+            double height = targetCanvas.ActualHeight;
+            if (width <= 0 || height <= 0) return;
+
+            // 2. 가로 점선 그리기 (0, 25, 50, 75, 100%)
             for (int i = 0; i <= 4; i++)
             {
                 double y = (height / 4) * i;
@@ -190,21 +213,22 @@ namespace SystemMonitor
                     Y1 = y,
                     Y2 = y,
                     Stroke = Brushes.DimGray,
-                    StrokeDashArray = new DoubleCollection(new double[] { 4, 4 }), //점선
-                    Opacity = 0.5
+                    StrokeDashArray = new DoubleCollection(new double[] { 4, 4 }),
+                    Opacity = 0.3
                 };
-                GraphCanvas.Children.Add(gridLine);
+                targetCanvas.Children.Add(gridLine);
 
-                //숫자표기
+                double labelValue = maxVal - (i * (maxVal / 4));
+                // 숫자 표기
                 TextBlock label = new TextBlock
                 {
-                    Text = $"{(100 - i * 25)}",
+                    Text = labelValue > 1 ? labelValue.ToString("F1") : labelValue.ToString("F2"),
                     Foreground = Brushes.Gray,
-                    FontSize = 10
+                    FontSize = 9
                 };
-                Canvas.SetLeft(label, 5);
+                Canvas.SetLeft(label, 2);
                 Canvas.SetTop(label, y - 12);
-                GraphCanvas.Children.Add(label);
+                targetCanvas.Children.Add(label);
             }
         }
         private void UpdateStatistics(double value)

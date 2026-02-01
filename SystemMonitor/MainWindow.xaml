@@ -6,92 +6,99 @@
         xmlns:local="clr-namespace:SystemMonitor"
         mc:Ignorable="d"
         Title="Monitor" Height="600" Width="800">
-    <Grid Margin="20">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+    <Grid Background="#121212">
+        <TabControl x:Name="MainTabs" Background="Transparent" BorderThickness="0" Margin="5">
 
-        <Grid Grid.Column="0" Grid.ColumnSpan="2" Margin="0,35,503.6,88.4">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-            </Grid.RowDefinitions>
+            <TabItem Header="DASHBOARD" Width="120" Height="35">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-            <Grid Grid.Row="0" VerticalAlignment="Center">
-                <Ellipse Stroke="#333333" StrokeThickness="15" Width="160" Height="160"/>
-                <Ellipse Name="GaugeEllipse" Stroke="Lime" StrokeThickness="15" Width="160" Height="160"
-                 StrokeDashArray="0 9999" RenderTransformOrigin="0.5,0.5">
-                    <Ellipse.RenderTransform>
-                        <RotateTransform Angle="-90"/>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Name="GaugeText" Text="0" FontSize="35" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="CPU" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Grid>
+                    <GroupBox Header="CPU" Foreground="Cyan" Margin="5">
+                        <Viewbox>
+                            <Grid>
+                                <Ellipse Stroke="#222" StrokeThickness="10" Width="200" Height="200"/>
+                                <Ellipse x:Name="GaugeEllipse" Stroke="Cyan" StrokeThickness="20" Width="200" Height="200" 
+                                     StrokeDashArray="0, 1000"/>
+                                <TextBlock x:Name="GaugeText" Text="0" Foreground="White" FontSize="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Grid>
+                        </Viewbox>
+                    </GroupBox>
 
-            <Grid Grid.Row="1" VerticalAlignment="Center">
-                <Ellipse Stroke="#333333" StrokeThickness="15" Width="160" Height="160"/>
-                <Ellipse Name="RamGaugeEllipse" Stroke="LemonChiffon" StrokeThickness="15" Width="160" Height="160"
-                 StrokeDashArray="0 9999" RenderTransformOrigin="0.5,0.5">
-                    <Ellipse.RenderTransform>
-                        <RotateTransform Angle="-90"/>
-                    </Ellipse.RenderTransform>
-                </Ellipse>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Name="RamGaugeText" Text="0" FontSize="35" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="MEMORY" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Grid>
-        </Grid>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
-            <TextBlock Name="TxtMin" Text="Min: 0%" Margin="10,0" Foreground="blue"/>
-            <TextBlock Name="TxtAvg" Text="Avg: 0%" Margin="10,0" Foreground="black"/>
-            <TextBlock Name="TxtMax" Text="Max: 0%" Margin="10,0" Foreground="OrangeRed"/>
-        </StackPanel>
-        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="20,0,20,20">
-    
-    <TextBlock Text="GPU Usage" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
-    <Grid Margin="0,0,0,10">
-        <ProgressBar Name="GpuBar" Height="12" Value="0" Maximum="100" 
-                     Background="#333" Foreground="SkyBlue" BorderThickness="0"/>
-        <TextBlock Name="GpuText" Text="0%" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
-    </Grid>
+                    <GroupBox Header="MEMORY" Foreground="Lime" Margin="5" Grid.Column="1">
+                        <Viewbox>
+                            <Grid>
+                                <Ellipse Stroke="#222" StrokeThickness="10" Width="200" Height="200"/>
+                                <Ellipse x:Name="RamGaugeEllipse" Stroke="Lime" StrokeThickness="20" Width="200" Height="200" 
+                                     StrokeDashArray="0, 1000"/>
+                                <TextBlock x:Name="RamGaugeText" Text="0" Foreground="White" FontSize="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Grid>
+                        </Viewbox>
+                    </GroupBox>
 
-    <TextBlock Text="Network Speed" FontSize="11" Foreground="Gray" Margin="0,0,0,3"/>
-    <Grid>
-        <ProgressBar Name="NetBar" Height="12" Value="0" Maximum="100" 
-                     Background="#333" Foreground="LightPink" BorderThickness="0"/>
-        <TextBlock Name="NetText" Text="0 MB/s" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
-    </Grid>
-    
-</StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="10">
+                        <TextBlock Text="GPU" Foreground="Orange" Margin="0,0,0,5"/>
+                        <ProgressBar x:Name="GpuBar" Height="20" Maximum="100" Foreground="Orange" Background="#222"/>
+                        <TextBlock x:Name="GpuText" Text="0%" Foreground="White" HorizontalAlignment="Right"/>
+                    </StackPanel>
 
-        <Grid Grid.Column="1" Margin="20,0,0,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="180" />
-            </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="10">
+                        <TextBlock Text="NETWORK" Foreground="Pink" Margin="0,0,0,5"/>
+                        <ProgressBar x:Name="NetBar" Height="20" Maximum="100" Foreground="Pink" Background="#222"/>
+                        <TextBlock x:Name="NetText" Text="0.0 MB/s" Foreground="White" HorizontalAlignment="Right"/>
+                    </StackPanel>
 
-            <DockPanel Grid.Row="0" Margin="0,0,0,10">
-                <TextBlock Name="CpuText" DockPanel.Dock="Top" Text="수신 대기 중..." 
-                   Foreground="black" FontSize="18" Margin="0,0,0,10"/>
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                        <TextBlock x:Name="TxtMin" Text="Min: 0%" Foreground="Gray" Margin="10,0"/>
+                        <TextBlock x:Name="TxtMax" Text="Max: 0%" Foreground="Gray" Margin="10,0"/>
+                        <TextBlock x:Name="TxtAvg" Text="Avg: 0%" Foreground="Gray" Margin="10,0"/>
+                        <TextBlock x:Name="CpuText" Text="System Ready" Foreground="Cyan" Margin="10,0"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
 
-                <Border BorderBrush="#333333" BorderThickness="1">
-                    <Canvas Name="GraphCanvas" Background="Black" ClipToBounds="True" SizeChanged="GraphCanvas_SizeChanged">
-                        <Polyline Name="CpuLine" Stroke="Lime" StrokeThickness="2"/>
-                    </Canvas>
-                </Border>
-            </DockPanel>
+            <TabItem Header="DETAILED GRAPHS">
+                <UniformGrid Columns="2" Rows="2" Margin="10">
+                    <GroupBox Header="CPU History" Foreground="Cyan">
+                        <Canvas x:Name="CpuGraphCanvas" SizeChanged="GraphCanvas_SizeChanged" Background="#0A0A0A">
+                            <Polyline x:Name="CpuLine" Stroke="Cyan" StrokeThickness="2"/>
+                        </Canvas>
+                    </GroupBox>
 
-            <GroupBox Header="시스템 로그" Grid.Row="1">
-                <ListBox Name="LogList" Background="#222" Foreground="White" 
-                 FontSize="11" BorderThickness="0">
-                </ListBox>
-            </GroupBox>
-        </Grid>
+                    <GroupBox Header="RAM History" Foreground="Lime">
+                        <Canvas x:Name="RamGraphCanvas" SizeChanged="GraphCanvas_SizeChanged" Background="#0A0A0A">
+                            <Polyline x:Name="RamLine" Stroke="Lime" StrokeThickness="2"/>
+                        </Canvas>
+                    </GroupBox>
+
+                    <GroupBox Header="GPU History" Foreground="Orange">
+                        <Canvas x:Name="GpuGraphCanvas" SizeChanged="GraphCanvas_SizeChanged" Background="#0A0A0A">
+                            <Polyline x:Name="GpuLine" Stroke="Orange" StrokeThickness="2"/>
+                        </Canvas>
+                    </GroupBox>
+
+                    <GroupBox Header="Network History" Foreground="Pink">
+                        <Canvas x:Name="NetGraphCanvas" SizeChanged="GraphCanvas_SizeChanged" Background="#0A0A0A">
+                            <Polyline x:Name="NetLine" Stroke="Pink" StrokeThickness="2"/>
+                        </Canvas>
+                    </GroupBox>
+                </UniformGrid>
+            </TabItem>
+
+            <TabItem Header="LOGS" Width="120">
+                <Grid Margin="10">
+                    <ListBox x:Name="LogList" Background="#1A1A1A" Foreground="#DDAAAA" BorderBrush="#333" FontFamily="Consolas"/>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
     </Grid>
 
 
