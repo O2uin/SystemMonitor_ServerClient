@@ -55,12 +55,26 @@
                         <TextBlock x:Name="NetText" Text="0.0 MB/s" Foreground="White" HorizontalAlignment="Right"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                        <TextBlock x:Name="TxtMin" Text="Min: 0%" Foreground="Gray" Margin="10,0"/>
-                        <TextBlock x:Name="TxtMax" Text="Max: 0%" Foreground="Gray" Margin="10,0"/>
-                        <TextBlock x:Name="TxtAvg" Text="Avg: 0%" Foreground="Gray" Margin="10,0"/>
-                        <TextBlock x:Name="CpuText" Text="System Ready" Foreground="Cyan" Margin="10,0"/>
-                    </StackPanel>
+                    <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="10,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="TxtMin" Text="Min: 0%" Foreground="Gray" Margin="0,0,15,0"/>
+                            <TextBlock x:Name="TxtMax" Text="Max: 0%" Foreground="Gray" Margin="0,0,15,0"/>
+                            <TextBlock x:Name="TxtAvg" Text="Avg: 0%" Foreground="Gray" Margin="0,0,15,0"/>
+                            <TextBlock x:Name="CpuText" Text="System Ready" Foreground="Cyan"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="REBOOT" Click="btnReboot_Click" Width="90" Height="32" 
+                Margin="5,0" Background="#252525" Foreground="Orange" BorderBrush="Orange"/>
+                            <Button Content="SHUTDOWN" Click="btnShutdown_Click" Width="90" Height="32" 
+                Margin="5,0" Background="#252525" Foreground="Red" BorderBrush="Red"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </TabItem>
 
