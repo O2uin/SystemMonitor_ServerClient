@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Sockets;
 using Newtonsoft.Json; // NuGet에서 설치 필수
 using System.IO;
+using System.Windows.Media.Animation;
 
 namespace SystemMonitor
 {
@@ -42,6 +43,7 @@ namespace SystemMonitor
         private const int MaxPoints = 50;
         private double minCpu = 100, maxCpu = 0, sumCpu = 0;
         private int count = 0;
+        private bool isWarningOpen = false;
 
         public MainWindow()
         {
@@ -67,7 +69,7 @@ namespace SystemMonitor
                 try
                 {
                     client = new TcpClient();
-                    await client.ConnectAsync("127.0.0.1", 5000);
+                    await client.ConnectAsync("127.0.0.1", 5000);//ip주소 변경하면 타 ip 연결 가능(네트워크는 같아야함)
                     stream = client.GetStream();
                     AddLog("서버에 연결되었습니다.");
 
@@ -107,11 +109,6 @@ namespace SystemMonitor
 
                         CpuText.Text = $"| CPU: {packet.Cpu}% | MEM: {packet.Mem:F1}% | GPU: {packet.Gpu:F1}% | SPEED: {packet.Net:F1}MB/s |";
 
-                        if (packet.Cpu > 90)
-                        {
-                            AddLog($"경고: CPU 과부하 {packet.Cpu}%");
-                            //SaveLogToFile($"CPU Warning: {packet.Cpu}%");
-                        }
                     });
                 }
             }
@@ -262,6 +259,11 @@ namespace SystemMonitor
             GpuText.Text = $"{p.Gpu:F0}%";
             NetBar.Value = Math.Min(p.Net, 100);
             NetText.Text = $"{p.Net:F1} MB/s";
+
+            if (p.Cpu > 90 && !isWarningOpen && MainTabs.SelectedIndex != 2)
+            {
+                ShowWarning("Critical: CPU Usage Over 90%!");
+            }
         }
 
         private void UpdateGaugePath(double val, Ellipse ellipse)
@@ -272,9 +274,17 @@ namespace SystemMonitor
             double visiblePx = circumference * (val / 100.0);
             ellipse.StrokeDashArray = new DoubleCollection { visiblePx / stroke, 1000 };
 
-            if (val > 80) ellipse.Stroke = Brushes.Red;
-            else if (val > 50) ellipse.Stroke = Brushes.Orange;
-            else ellipse.Stroke = Brushes.Cyan;
+            if (ellipse.Name != "RamGaugeEllipse")
+            {
+                if (val > 80) ellipse.Stroke = Brushes.Red;
+                else if (val > 50) ellipse.Stroke = Brushes.Orange;
+                else ellipse.Stroke = Brushes.Cyan;
+            }
+            else
+            {
+                ellipse.Stroke = Brushes.Lime;
+            }
+                
         }
 
         private void SaveLogToFile(string msg)
@@ -289,8 +299,46 @@ namespace SystemMonitor
                 if (LogList.Items.Count > 50) LogList.Items.RemoveAt(50);
             });
         }
+        private void ShowWarning(string message)
+        {
+            if (isWarningOpen) return;
+            isWarningOpen = true;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    var warnWin = new WarningWindow(message);
+                    warnWin.Owner = this;
+
+                    // 창이 닫힐 때 실행 (확인 버튼 클릭 시 Close()가 호출되면 실행됨)
+                    warnWin.Closed += (s, e) =>
+                    {
+                        isWarningOpen = false; // 플래그 먼저 해제
+
+                        // 로그 탭으로 이동 및 포커스
+                        if (MainTabs != null)
+                        {
+                            MainTabs.SelectedIndex = 2;
+                            LogList?.Focus();
+                        }
+                    };
+
+                    warnWin.Show();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"창 띄우기 실패: {ex.Message}");
+                    isWarningOpen = false;
+                }
+            }));
+        }
+
+
 
         private void btnShutdown_Click(object sender, RoutedEventArgs e) => SendControlCommand("SHUTDOWN");
         private void btnReboot_Click(object sender, RoutedEventArgs e) => SendControlCommand("REBOOT");
+
+
     }
 }

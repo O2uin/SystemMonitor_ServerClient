@@ -1,0 +1,15 @@
+﻿<Window x:Class="SystemMonitor.WarningWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SystemMonitor"
+        mc:Ignorable="d"
+        Title="Warning" Height="150" Width="300" WindowStyle="ToolWindow" Topmost="True" Background="#2D2D2D">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock x:Name="MsgText" Text="Warning: CPU High!" Foreground="Red" FontSize="18" FontWeight="Bold" Margin="10"/>
+            <Button Content="OK" Click="Close_Click" Width="60" Height="25"/>
+        </StackPanel>
+    </Grid>
+</Window>
